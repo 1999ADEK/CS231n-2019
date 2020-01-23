@@ -80,7 +80,16 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # Append the bias dimension
+        X_b = np.hstack([X, np.ones((N, 1))])    # (N, D+1)
+        W1_b = np.vstack([W1, b1])    # (D+1, H)
+        W2_b = np.vstack([W2, b2])    # (H+1, C)
+        
+        Z1 = X_b @ W1_b    # (N, H)
+        A1 = np.maximum(0, Z1)    # (N, H)
+        A1_b = np.hstack([A1, np.ones((N, 1))])    # (N, H+1)
+        scores = A1_b @ W2_b    # (N, C)
+        
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -98,7 +107,14 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        scores -= scores.max()    # numerical stability
+        e_scores = np.exp(scores)    # (N, C)
+        correct_e_scores = e_scores[range(N), y]    # (N,)
+        e_sum = e_scores.sum(axis=1)    # (N,)
+        prob = correct_e_scores / e_sum    # (N,)
+        loss = -np.log(prob).sum() / N
+        
+        loss += reg * ((W1**2).sum() + (W2**2).sum())
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -111,8 +127,22 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
-
+        grad_soft = e_scores / e_sum.reshape(-1, 1)    # (N, C)
+        grad_soft[range(N), y] -= 1
+        
+        dW2_b = A1_b.T @ grad_soft   # (H+1, C)
+        dA1_b = grad_soft @ W2_b.T    # (N, H+1)
+        mask = A1 <= 0
+        dZ1 = dA1_b[:, :-1]    # (N, H)
+        dZ1[mask] = 0
+        dW1_b = X_b.T @ dZ1    # (D+1, H)
+        
+        grads['W1'] = dW1_b[:-1,:] / N + 2 * reg * W1
+        grads['b1'] = dW1_b[-1, :] / N
+        grads['W2'] = dW2_b[:-1,:] / N + 2 * reg * W2
+        grads['b2'] = dW2_b[-1, :] / N
+        #import pdb; pdb.set_trace()
+    
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         return loss, grads
@@ -156,7 +186,9 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            idx = np.random.choice(num_train, batch_size)
+            X_batch = X[idx, :]
+            y_batch = y[idx]
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -172,7 +204,10 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            self.params['W1'] -= learning_rate * grads['W1']
+            self.params['b1'] -= learning_rate * grads['b1']
+            self.params['W2'] -= learning_rate * grads['W2']
+            self.params['b2'] -= learning_rate * grads['b2']
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -218,7 +253,7 @@ class TwoLayerNet(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        y_pred = np.argmax(self.loss(X), axis=1)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
