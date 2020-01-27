@@ -311,16 +311,18 @@ def batchnorm_backward_alt(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    # See https://kevinzakka.github.io/2016/09/14/batch_normalization/ for 
+    # the derivation of this implementation.
+    
     N = dout.shape[0]
     x_norm, x_centered, dev, gamma = cache
     dgamma = (dout * x_norm).sum(axis=0)
     dbeta = dout.sum(axis=0)
     
-    dmean = dout.sum(axis=0) / N
-    dvar = 2/N * (dout * x_centered).sum(axis=0)
-    ddev = dvar / 2 / dev
-    dx = gamma * ((dout - dmean) * dev - x_centered * ddev) / dev**2
-    
+    dx_norm = dout * gamma
+    dx = 1/N / dev * (N * dx_norm - 
+                      dx_norm.sum(axis=0) - 
+                      x_norm * (dx_norm * x_norm).sum(axis=0))    
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -372,7 +374,7 @@ def layernorm_forward(x, gamma, beta, ln_param):
     std = np.sqrt(var + eps) # (N, 1)
     x_norm = x_centered / std # (N, D)
     out = x_norm * gamma + beta
-    cache = (x_norm, x_centered, std, gamma)
+    cache = (x_norm, std, gamma)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -408,14 +410,14 @@ def layernorm_backward(dout, cache):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     D = dout.shape[1]
-    x_norm, x_centered, std, gamma = cache
+    x_norm, std, gamma = cache
     dgamma = (dout * x_norm).sum(axis=0)
     dbeta = dout.sum(axis=0)
     
-    dmean = (dout * gamma).sum(axis=1).reshape((-1, 1)) / D 
-    dvar = 2/D * (dout * gamma * x_centered).sum(axis=1).reshape((-1, 1))
-    dstd = dvar / 2 / std
-    dx = ((dout * gamma - dmean) * std - x_centered * dstd) / std**2
+    dx_norm = dout * gamma
+    dx = 1/D / std * (D * dx_norm - 
+                      dx_norm.sum(axis=1).reshape((-1, 1)) - 
+                      x_norm * (dx_norm * x_norm).sum(axis=1).reshape(-1, 1)) 
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################

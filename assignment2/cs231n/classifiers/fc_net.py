@@ -200,9 +200,8 @@ class FullyConnectedNet(object):
             self.params[f'W{i+1}'] = np.random.normal(loc=0.0, scale=weight_scale, 
                                                       size=(last_dim, dim))
             self.params[f'b{i+1}'] = np.zeros(dim)
-            if normalization == 'batchnorm' or \
-               normalization == 'layernorm' and \
-               i != self.num_layers - 1:
+            if (normalization == 'batchnorm' or normalization == 'layernorm') and \
+                i != self.num_layers - 1:
                 self.params[f'gamma{i+1}'] = np.ones(dim)
                 self.params[f'beta{i+1}'] = np.zeros(dim)
             last_dim = dim
@@ -284,7 +283,7 @@ class FullyConnectedNet(object):
                 inputs, cache[f'lyr{i}_ln'] = layernorm_forward(inputs, 
                                                                 self.params[f'gamma{i}'], 
                                                                 self.params[f'beta{i}'], 
-                                                                {'eps': 1e-5})
+                                                                self.bn_params[i-1])
             inputs, cache[f'lyr{i}_relu'] = relu_forward(inputs)
         scores, cache[f'lyr{num_lyrs}'] = affine_forward(inputs, 
                                                          self.params[f'W{num_lyrs}'], 
