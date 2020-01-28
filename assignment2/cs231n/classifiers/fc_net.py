@@ -284,6 +284,9 @@ class FullyConnectedNet(object):
                                                                 self.params[f'gamma{i}'], 
                                                                 self.params[f'beta{i}'], 
                                                                 self.bn_params[i-1])
+            if self.use_dropout:
+                inputs, cache[f'lyr{i}_do'] = dropout_forward(inputs, 
+                                                              self.dropout_param)
             inputs, cache[f'lyr{i}_relu'] = relu_forward(inputs)
         scores, cache[f'lyr{num_lyrs}'] = affine_forward(inputs, 
                                                          self.params[f'W{num_lyrs}'], 
@@ -323,6 +326,8 @@ class FullyConnectedNet(object):
         
         for i in range(num_lyrs-1, 0, -1):
             dout = relu_backward(dout, cache[f'lyr{i}_relu'])
+            if self.use_dropout:
+                dout = dropout_backward(dout, cache[f'lyr{i}_do'])
             if self.normalization=='batchnorm':
                 dout , grads[f'gamma{i}'], grads[f'beta{i}'] = \
                                     batchnorm_backward_alt(dout, cache[f'lyr{i}_bn'])
