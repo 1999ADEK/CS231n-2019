@@ -154,7 +154,7 @@ class CaptioningRNN(object):
         if self.cell_type == 'rnn':
             h, cache['rnn'] = rnn_forward(x, h0, Wx, Wh, b)
         else:
-            pass
+            h, cache['lstm'] = lstm_forward(x, h0, Wx, Wh, b)
         
         # Compute scores over the vocabulary at every timestep using the hidden states
         out, cache['hidden2vocab'] = temporal_affine_forward(h, W_vocab, b_vocab)
@@ -169,7 +169,8 @@ class CaptioningRNN(object):
             dx, dh0, grads['Wx'], grads['Wh'], grads['b'] = \
                                                     rnn_backward(dout, cache['rnn'])
         else:
-            pass
+            dx, dh0, grads['Wx'], grads['Wh'], grads['b'] = \
+                                                    lstm_backward(dout, cache['lstm'])
         grads['W_embed'] = word_embedding_backward(dx, cache['word_embedding'])
         _, grads['W_proj'], grads['b_proj'] = affine_backward(dh0, cache['feat2hidden'])
 
@@ -243,10 +244,13 @@ class CaptioningRNN(object):
         # Initialize the hidden state
         h, _ = affine_forward(features, W_proj, b_proj)
         x = self._start
-        
+        c = 0
         for t in range(max_length):
             x_embed, _ = word_embedding_forward(x, W_embed)
-            h, _ = rnn_step_forward(x_embed, h, Wx, Wh, b)
+            if self.cell_type == 'rnn':
+                h, _ = rnn_step_forward(x_embed, h, Wx, Wh, b)
+            else:
+                h, c, _ = lstm_step_forward(x_embed, h, c, Wx, Wh, b)
             score, _ = temporal_affine_forward(h.reshape((N, 1, -1)), W_vocab, b_vocab)
             score = score.reshape((N, -1))
             x = score.argmax(axis=1)
