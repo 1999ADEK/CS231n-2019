@@ -142,7 +142,36 @@ class CaptioningRNN(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        cache = {}
+        
+        # Compute the initial hidden state from the image features
+        h0, cache['feat2hidden'] = affine_forward(features, W_proj, b_proj)
+        
+        # Transform the words in captions_in from indices to vectors
+        x, cache['word_embedding'] = word_embedding_forward(captions_in, W_embed)
+        
+        # Process the sequence of input word vectors and produce hidden state
+        if self.cell_type == 'rnn':
+            h, cache['rnn'] = rnn_forward(x, h0, Wx, Wh, b)
+        else:
+            pass
+        
+        # Compute scores over the vocabulary at every timestep using the hidden states
+        out, cache['hidden2vocab'] = temporal_affine_forward(h, W_vocab, b_vocab)
+        
+        # Compute loss using captions_out
+        loss, dout = temporal_softmax_loss(out, captions_out, mask)
+        
+        # Compute the gradient
+        dout, grads['W_vocab'], grads['b_vocab'] = \
+                                temporal_affine_backward(dout, cache['hidden2vocab'])
+        if self.cell_type == 'rnn':
+            dx, dh0, grads['Wx'], grads['Wh'], grads['b'] = \
+                                                    rnn_backward(dout, cache['rnn'])
+        else:
+            pass
+        grads['W_embed'] = word_embedding_backward(dx, cache['word_embedding'])
+        _, grads['W_proj'], grads['b_proj'] = affine_backward(dh0, cache['feat2hidden'])
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -211,7 +240,17 @@ class CaptioningRNN(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # Initialize the hidden state
+        h, _ = affine_forward(features, W_proj, b_proj)
+        x = self._start
+        
+        for t in range(max_length):
+            x_embed, _ = word_embedding_forward(x, W_embed)
+            h, _ = rnn_step_forward(x_embed, h, Wx, Wh, b)
+            score, _ = temporal_affine_forward(h.reshape((N, 1, -1)), W_vocab, b_vocab)
+            score = score.reshape((N, -1))
+            x = score.argmax(axis=1)
+            captions[:, t] = x
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
