@@ -1,1 +1,21 @@
-# Learning_CNN
+# CS231n-2019
+My solutions to assignments from http://cs231n.stanford.edu
+
+### [Assignment #1](https://github.com/1999ADEK/CS231n-2019/tree/master/assignment1)
+* [k-Nearest Neighbor classifier](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment1/knn.ipynb)
+* [Training a Support Vector Machine](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment1/svm.ipynb)
+* [Implement a Softmax classifier](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment1/softmax.ipynb)
+* [Two-Layer Neural Network](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment1/two_layer_net.ipynb)
+* [Higher Level Representations: Image Features](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment1/features.ipynb)
+### [Assignment #2](https://github.com/1999ADEK/CS231n-2019/tree/master/assignment2)
+* [Fully-connected Neural Network](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment2/FullyConnectedNets.ipynb)
+* [Batch Normalization](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment2/BatchNormalization.ipynb)
+* [Dropout](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment2/Dropout.ipynb)
+* [Convolutional Networks](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment2/ConvolutionalNetworks.ipynb)
+* [PyTorch on CIFAR-10](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment2/PyTorch.ipynb)
+### [Assignment #3](https://github.com/1999ADEK/CS231n-2019/tree/master/assignment3)
+* [Image Captioning with Vanilla RNNs](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment3/RNN_Captioning.ipynb)
+* [Image Captioning with LSTMs](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment3/LSTM_Captioning.ipynb)
+* [Network Visualization: Saliency maps, Class Visualization, and Fooling Images](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment3/NetworkVisualization-PyTorch.ipynb)
+* [Style Transfer](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment3/StyleTransfer-PyTorch.ipynb)
+* [Generative Adversarial Networks](https://github.com/1999ADEK/CS231n-2019/blob/master/assignment3/Generative_Adversarial_Networks_PyTorch.ipynb)
